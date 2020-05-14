@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Frontend</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="script.js"></script>
+</head>
+
+<body style="padding-bottom: 48px">
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		window.userId = /*[[${userId}]]*/;
+		/*]]>*/
+		</script>
+
+  <div id="logged" class="container">
+    <!-- Строчка с заголовком -->
+    <div class="row">
+      <header style="padding: 16px 32px;">
+        <h1>WishList</h1>
+      </header>
+    </div>
+    <!-- Логиньььь -->
+    <div class="row">
+      <div class="col" style="text-align: right">
+        <div>Користувач: <span id="username" th:text="${username}"></span></div><br>
+      </div>
+    </div>
+    <!-- Контент -->
+    <div class="row">
+      <div class="col">
+        <!-- Навігація -->
+        <nav>
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" href="#todo" role="tab" data-toggle="tab">Завдання</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#grocerylist" role="tab" data-toggle="tab">Список покупок</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#plans" role="tab" data-toggle="tab">Плани</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <main class="col">
+        <div class="tab-content">
+          <div class="tab-pane show active" id="todo" role="tabpanel">
+            <div class="row">
+              <div class="col-sm-3">
+                <!-- Додати категорію -->
+                <div class="modal fade" id="add-cat" tabindex="-1" role="dialog">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="add-cat-label">Нова категорія</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                          <span>&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form>
+                          <div class="form-group">
+                            <label for="add-cat-title" class="col-form-label">Найменування:</label>
+                            <input type="text" class="form-control" id="add-cat-title">
+                          </div>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addCategory()">Додати</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Категорії завдань -->
+                <nav>
+                  <ul class="nav nav-pills flex-column" id="catnav">
+                    <li class="nav-item">
+                      <a class="nav-link active" href="#">Всі категорії</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#" data-cat-id="0">Без категорії</a>
+                    </li>
+                    <th:block th:each="category : ${categories}">
+                    	<li class="nav-item">
+			    			<a class="nav-link" href="#" th:attr="data-cat-id=${category.id}" th:text="${category.name}"></a>
+			    		</li>
+                    </th:block>
+                  </ul>
+                  <button type="button" class="btn nav-item list-group-item-action" data-toggle="modal" data-target="#add-cat">
+                    Нова категорія
+                  </button>
+                </nav><br>
+              </div>
+              <div>
+                <!-- Додати завдання -->
+                <div class="modal fade" id="add-todo" tabindex="-1" role="dialog">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="add-todo-label">Нове завдання</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                          <span>&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <form>
+                          <div class="form-group">
+                            <label for="add-todo-title" class="col-form-label">Заголовок:</label>
+                            <input type="text" class="form-control" id="add-todo-title">
+                          </div>
+                          <div class="form-group">
+                            <label for="add-todo-category" class="col-form-label">Категорія:</label>
+                            <select class="custom-select" id="add-todo-category">
+                              <option value="0" selected>Без категорії</option>
+                              <th:block th:each="category : ${categories}">
+                              <option th:attr="value=${category.id}" th:text="${category.name}"></option>
+                              </th:block>
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label for="add-todo-details" class="col-form-label">Опис завдання:</label>
+                            <textarea class="form-control" id="add-todo-details"></textarea>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addTodo()">Додати</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <!-- Кнопка додати завдання -->
+                <button type="button" class="btn list-group-item list-group-item-action" data-toggle="modal" data-target="#add-todo">
+                  + Додати
+                </button><br>
+                <!-- Список завдань -->
+                <div class="card-columns" id="TasksList">
+                <th:block th:each="task : ${tasks}">
+	                <div class="card" th:attr="data-cat=${task.getCategories() == null ? 0 : task.getCategories().getId()},data-todo-id=${task.id}" th:if="${task.getDone() == false}">
+				    <div class="card-body">
+				    	<h5 class="card-title" th:text="${task.name}"></h5>
+				    	<h6 class="card-subtitle mb-2 text-muted">
+				    	<span class="badge badge-pill badge-secondary" th:if="${task.getCategories() == null}">Без категорії</span>
+				    	<span class="badge badge-pill badge-secondary" th:unless="${task.getCategories() == null}" th:text="${task.getCategories().getName()}"></span>
+				    	</h6>
+				    	<p th:text="${task.description}"></p>
+				    	<a href="#" class="card-link doneTask">Виконати</a>
+				    	</div></div>
+			    </th:block>
+                </div>
+                <div class="row" style="padding: 48px 0">
+                  <hr class="col">
+                  <span class="col-auto">
+                    Архив
+                  </span>
+                  <hr class="col">
+                </div>
+                <div class="card-columns" id="TasksListDone">
+                <th:block th:each="task : ${tasks}">
+	                <div class="card" th:attr="data-cat=${task.getCategories() == null ? 0 : task.getCategories().getId()},data-todo-id=${task.id}" th:if="${task.getDone() == true}">
+				    <div class="card-body">
+				    	<h5 class="card-title" th:text="${task.name}"></h5>
+				    	<h6 class="card-subtitle mb-2 text-muted">
+				    	<span class="badge badge-pill badge-secondary" th:if="${task.getCategories() == null}">Без категорії</span>
+				    	<span class="badge badge-pill badge-secondary" th:unless="${task.getCategories() == null}" th:text="${task.getCategories().getName()}"></span>
+				    	</h6>
+				    	<p th:text="${task.description}"></p>
+				    	</div></div>
+			    </th:block>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="grocerylist" role="tabpanel">
+            <!-- Додати покупки -->
+            <div class="modal fade" id="add-groceries" tabindex="-1" role="dialog">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="add-groceries-label">Нова покупка</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                      <span>&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form>
+                      <div class="form-group">
+                        <label for="add-groceries-title" class="col-form-label">Найменування:</label>
+                        <input type="text" class="form-control" id="add-groceries-title">
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addGroceries()">Додати</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Кнопка додати покупки -->
+            <button type="button" class="btn list-group-item list-group-item-action" data-toggle="modal" data-target="#add-groceries">+ Додати</button><br>
+            <!-- Список покупок -->
+            <ul class="list-group" id="groceries">
+            <th:block th:each="purchase : ${purchases}">
+            	<li class="list-group-item d-flex justify-content-between align-items-center" th:if="${purchase.getDone() == false}" th:attr="data-purchases-id=${purchase.id}">
+            		<span th:text="${purchase.name}"></span>
+				    <button type="button" class="btn btn-sm mvGrocery">×</button>
+				 </li>
+			</th:block>
+            </ul>
+            <div class="row" style="padding: 48px 0">
+              <hr class="col">
+              <span class="col-auto">
+                Архив
+              </span>
+              <hr class="col">
+            </div>
+            <ul class="list-group" id="groceriesdone">
+            <th:block th:each="purchase : ${purchases}">
+            	<li class="list-group-item d-flex justify-content-between align-items-center" th:if="${purchase.getDone() == true}" th:attr="data-purchases-id=${purchase.id}">
+            		<span th:text="${purchase.name}"></span>
+				 </li>
+			</th:block>
+            </ul>
+          </div>
+
+          <div class="tab-pane" id="plans" role="tabpanel">
+            <div class="modal fade" id="add-plans" tabindex="-1" role="dialog">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="add-plans-label">Новий план</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                      <span>&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form>
+                      <div class="form-group">
+                        <label for="add-plans-title" class="col-form-label">Найменування:</label>
+                        <input type="text" class="form-control" id="add-plans-title">
+                      </div>
+                      <div class="form-group">
+                        <div class="custom-control custom-radio">
+                          <input type="radio" id="shortterm-radio" name="perspective" class="custom-control-input" value="shortterm" checked="">
+                          <label class="custom-control-label" for="shortterm-radio">Короткострокові</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                          <input type="radio" id="longterm-radio" name="perspective" class="custom-control-input" value="longterm">
+                          <label class="custom-control-label" for="longterm-radio">Довгострокові</label>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addPlan()">Додати</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Кнопка додати покупки -->
+            <button type="button" class="btn list-group-item list-group-item-action" data-toggle="modal" data-target="#add-plans">+ Додати</button><br>
+            <!-- Список планів -->
+            <div class="row">
+           
+              <div class="col-sm-6">
+			    
+                <h5>Короткострокові</h5>
+                <ul class="list-group" id="shortterm">
+                
+                <th:block th:each="plan : ${plans}">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:attr="data-plans-id=${plan.id}" th:if="${plan.getShortterm() == false && plan.getDone() == false}">
+            	<span th:text="${plan.getName()}"></span>
+            	<button type="button" class="btn btn-sm mvPlan">×</button>
+                </li>
+                </th:block>
+                </ul>
+              </div>
+              <div class="col-sm-6">
+                <h5>Довгострокові</h5>
+                <ul class="list-group" id="longterm">
+                <th:block th:each="plan : ${plans}">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:attr="data-plans-id=${plan.id}" th:if="${plan.getShortterm() != false && plan.getDone() == false}">
+            	<span th:text="${plan.getName()}"></span>
+            	<button type="button" class="btn btn-sm mvPlan">×</button>
+                </li>
+                </th:block>
+                </ul>
+              </div>
+            </div>
+            <div class="row" style="padding: 48px 0">
+              <hr class="col">
+              <span class="col-auto">
+                Архив
+              </span>
+              <hr class="col">
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <h5>Короткострокові</h5>
+                <ul class="list-group" id="shorttermdone">
+                <th:block th:each="plan : ${plans}">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:attr="data-plans-id=${plan.id}" th:if="${plan.getShortterm() == false && plan.getDone() == true}">
+            	<span th:text="${plan.getName()}"></span>
+                </li>
+                </th:block>
+                </ul>
+              </div>
+              <div class="col-sm-6">
+                <h5>Довгострокові</h5>
+                <ul class="list-group" id="longtermdone">
+                <th:block th:each="plan : ${plans}">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:attr="data-plans-id=${plan.id}" th:if="${plan.getShortterm() != false && plan.getDone() == true}">
+            	<span th:text="${plan.getName()}"></span>
+                </li>
+                </th:block>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+
+</html>
